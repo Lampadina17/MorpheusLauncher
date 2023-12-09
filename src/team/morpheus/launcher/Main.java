@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.0, 07_12_2023)";
+    public static final String build = "(v1.0 | 09_12_2023)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
@@ -28,7 +28,7 @@ public class Main {
 
     // NOTE: it's important to set -Djava.library.path by giving natives path, else game won't start!
     public static void main(String[] args) throws Exception {
-        log.info(String.format("Morpheus Launcher %s | Lampadina_17 (cc by-nc-sa)", build));
+        log.info(String.format("Morpheus Launcher %s | Lampadina_17 (by-nc-sa)", build));
 
         /* Morpheus product's related arguments, most people can ignore this */
         Option var0 = Option.builder("a").longOpt("accessToken").argName("token").hasArg().desc("").build();
