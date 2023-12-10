@@ -26,7 +26,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 1. make sure to use azul zulu 8 or 17 for best experience
 2. download latest launcher build from: https://morpheuslauncher.it/downloads/Launcher.jar
 3. grant network (if using firewall) and execution permissions (if using linux)
-4. run Launcher.jar with commandline, for more details use help argument. example: `java -jar Launcher.jar -help`
+4. run: `java -jar Launcher.jar` to print usage arguments
 
 # :package: Maven Dependencies
 - commons.cli
