@@ -11,7 +11,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 - Highly scalable code
 - Lightweight
 
-*currently forge compatibility is limited to a few versions, join my discord for more informations
+*currently forge compatibility is limited to a few versions, take a look [here](https://morpheus-launcher.gitbook.io/home/compatibility) for more informations
 
 # :arrow_down: Installation/Usage
 **for basic users (GUI):**
@@ -35,6 +35,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 - projectlombok.lombok
 
 # :mega: Need more info?
+- Official launcher wiki: https://morpheus-launcher.gitbook.io/home/
 - Join my discord: https://discord.com/invite/aerXnBe
 
 # :balance_scale: Opensource licensing
