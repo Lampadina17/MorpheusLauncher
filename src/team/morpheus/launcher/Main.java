@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.0 | 09_12_2023)";
+    public static final String build = "(v1.0.2 | 26_12_2023)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
@@ -81,7 +81,7 @@ public class Main {
         for (Option option : options.getOptions()) { /* Shitty workaround due to shitty bug */
             System.out.println(String.format("-%s, -%-45s %s", option.getOpt(), (option.getLongOpt() + (option.hasArg() ? " <" + option.getArgName() + ">" : "")), option.getDescription()));
         }
-        System.out.println("\nNotes:\n* While premium players can give to 'minecraftToken' argument their Minecraft session token, sp players will instead have to give 0 as the value.\n");
+        System.out.println("\nCheck wiki for more details: https://morpheus-launcher.gitbook.io/home/\n");
     }
 
     private static void copyToClipboard(String text) {

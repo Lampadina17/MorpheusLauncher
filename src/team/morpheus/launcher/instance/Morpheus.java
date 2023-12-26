@@ -45,7 +45,7 @@ public class Morpheus {
         /* Parse user json and make an instance */
         user = new Gson().fromJson(userjson, MorpheusUser.class);
 
-        log.info(String.format("authenticated as: %s", user.data.username));
+        log.info(String.format("Authenticated as: %s", user.data.username));
 
         if (!user.data.products.contains(session.getProductID())) {
             log.error("This user doesn't own this product!");

@@ -56,7 +56,7 @@ public class Launcher {
 
             target = findVersion(vanilla, targetName);
         } catch (Exception e) {
-            log.error("cannot download/parse mojang versions json");
+            log.error("Cannot download/parse mojang versions json");
         }
 
         // Make .minecraft/
@@ -239,7 +239,7 @@ public class Launcher {
         classPath.append(new File(jarFile.toURI()).getPath());
         System.setProperty("java.class.path", classPath.toString());
 
-        log.info("enabled classpath compatibility mode, this is needed by modloaders to work");
+        log.info("Enabled classpath compatibility mode, this is needed by modloaders to work");
     }
 
     /* Retrieve versions list from mojang server */
@@ -330,7 +330,7 @@ public class Launcher {
 
                 /* Append the library path to local list if not present */
                 if (!paths.contains(file.toURI().toURL()) && paths.add(file.toURI().toURL())) {
-                    log.info(String.format("loading: %s", file.toURI().toURL()));
+                    log.info(String.format("Loading: %s", file.toURI().toURL()));
                 }
             }
 
@@ -354,7 +354,7 @@ public class Launcher {
 
             /* Append the library path to local list if not present */
             if (!paths.contains(libfile.toURI().toURL()) && paths.add(libfile.toURI().toURL())) {
-                log.info(String.format("loading: %s", libfile.toURI().toURL()));
+                log.info(String.format("Loading: %s", libfile.toURI().toURL()));
             }
         }
         return paths;
@@ -368,12 +368,12 @@ public class Launcher {
         /* dependencies to be classloaded */
         for (MorpheusProduct.Library customLib : product.data.libraries) {
             URL customLibUrl = new URL(String.format(query, Main.getMorpheusAPI(), Main.getMorpheus().session.getSessionToken(), Main.getMorpheus().session.getProductID(), customLib.name));
-            if (paths.add(customLibUrl)) log.info(String.format("dynamic loading: %s", customLib.name));
+            if (paths.add(customLibUrl)) log.info(String.format("Dynamic Loading: %s", customLib.name));
         }
 
         /* client to be classloaded */
         URL customJarUrl = new URL(String.format(query, Main.getMorpheusAPI(), Main.getMorpheus().session.getSessionToken(), Main.getMorpheus().session.getProductID(), product.data.name));
-        if (paths.add(customJarUrl)) log.info(String.format("dynamic loading: %s", product.data.name));
+        if (paths.add(customJarUrl)) log.info(String.format("Dynamic Loading: %s", product.data.name));
         return paths;
     }
 
@@ -384,11 +384,11 @@ public class Launcher {
             if (path.getPath().contains("log4j-core")) {
                 URL log4jcore = new URL("https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.21.0/log4j-core-2.21.0.jar");
                 updatedPaths.add(log4jcore);
-                log.info(String.format("swapped: %s with %s", path.getPath(), log4jcore.toURI().toURL()));
+                log.info(String.format("Swapped: %s with %s", path.getPath(), log4jcore.toURI().toURL()));
             } else if (path.getPath().contains("log4j-api")) {
                 URL log4japi = new URL("https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.21.0/log4j-api-2.21.0.jar");
                 updatedPaths.add(log4japi);
-                log.info(String.format("swapped: %s with %s", path.getPath(), log4japi.toURI().toURL()));
+                log.info(String.format("Swapped: %s with %s", path.getPath(), log4japi.toURI().toURL()));
             } else {
                 updatedPaths.add(path);
             }
@@ -432,32 +432,32 @@ public class Launcher {
                     case windows:
                         if (windows32 != null) {
                             Utils.downloadAndUnzipNatives(new URL(windows32.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", windows32.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", windows32.url, OSUtils.getPlatform()));
                         }
                         if (windows64 != null) {
                             Utils.downloadAndUnzipNatives(new URL(windows64.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", windows64.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", windows64.url, OSUtils.getPlatform()));
                         }
                         if (windows != null) {
                             Utils.downloadAndUnzipNatives(new URL(windows.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", windows.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", windows.url, OSUtils.getPlatform()));
                         }
                         break;
                     case linux:
                         if (linux != null) {
                             Utils.downloadAndUnzipNatives(new URL(linux.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", linux.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", linux.url, OSUtils.getPlatform()));
                         }
                         break;
                     /* Dear mojang why you use different natives names in your json?? */
                     case macos:
                         if (osx != null) {
                             Utils.downloadAndUnzipNatives(new URL(osx.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", osx.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", osx.url, OSUtils.getPlatform()));
                         }
                         if (macos != null) {
                             Utils.downloadAndUnzipNatives(new URL(macos.url), nativesFolder, log);
-                            log.info(String.format("downloaded and extracted %s for %s", macos.url, OSUtils.getPlatform()));
+                            log.info(String.format("Downloaded and extracted %s for %s", macos.url, OSUtils.getPlatform()));
                         }
                         break;
                     /* Fallback error in case user have weird os like solaris or bsd */
@@ -481,7 +481,7 @@ public class Launcher {
 
                     if (!compatible) continue;
                     Utils.downloadAndUnzipNatives(new URL(nativeURL), nativesFolder, log);
-                    log.info(String.format("downloaded and extracted %s for %s (%s)", nativeURL, OSUtils.getPlatform(), os_arch));
+                    log.info(String.format("Downloaded and extracted %s for %s (%s)", nativeURL, OSUtils.getPlatform(), os_arch));
                 }
             }
         }
@@ -494,7 +494,7 @@ public class Launcher {
                     if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_osx != null && lib.downloads.classifiers.natives_osx.url.contains("lwjgl-platform-2")) {
                         String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-macos-aarch64.zip", Main.getMorpheusAPI());
                         Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
                     }
                     break;
                 case linux:
@@ -502,13 +502,13 @@ public class Launcher {
                     if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
                         String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-aarch64.zip", Main.getMorpheusAPI());
                         Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
                     }
                     // LWJGL 3.3 (1.19+)
                     if (lib.name.contains("native") && lib.rules != null && checkRule(lib.rules) && lib.name.contains("lwjgl")) {
                         String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-3.3-linux-aarch64.zip", Main.getMorpheusAPI());
                         Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
                     }
                     break;
             }
@@ -563,7 +563,7 @@ public class Launcher {
     private File makeDirectory(String path) {
         File temp = new File(path);
         if (!temp.exists() && temp.mkdirs()) {
-            log.info(String.format("directory created: %s", temp.getPath()));
+            log.info(String.format("Directory created: %s", temp.getPath()));
         }
         return temp;
     }
