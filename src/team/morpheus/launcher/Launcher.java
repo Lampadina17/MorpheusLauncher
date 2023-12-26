@@ -278,7 +278,7 @@ public class Launcher {
 
         /* Invoke the main with the given arguments */
         try {
-            log.debug(String.format("invoking: %s", c.getName()));
+            log.debug(String.format("Invoking: %s", c.getName()));
             mainMethodHandle.invokeExact(startArgs);
         } catch (Throwable e) {
             if (e.getMessage() != null) log.error(e.getMessage());

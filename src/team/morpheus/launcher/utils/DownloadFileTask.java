@@ -24,7 +24,7 @@ public class DownloadFileTask implements Runnable {
     public void run() {
         try (InputStream in = source.openStream()) {
             Files.copy(in, Paths.get(target), StandardCopyOption.REPLACE_EXISTING);
-            log.info(String.format("downloaded: %s from: %s", target, source));
+            log.info(String.format("Downloaded: %s from: %s", target, source));
         } catch (Exception e) {
             e.printStackTrace();
         }
