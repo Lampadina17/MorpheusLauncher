@@ -3,10 +3,10 @@ Universal commandline minecraft launcher based on dynamic classloading
 
 # :zap: Features 
 - Compatible with vanilla, optifine, fabric, forge*
-- Compatible with java 8 and 17
 - Compatible with windows, macos, linux
 - Support for Premium and SP accounts
 - Support for Arm®-based processors
+- Compatible with java 8 amd 17
 - Automatic fabric installation
 - Commandline operation
 - Highly scalable code
