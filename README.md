@@ -9,6 +9,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 - Automatic fabric installation
 - Commandline operation
 - Highly scalable code
+- Crossplatform
 - Lightweight
 
 *currently forge compatibility is limited to a few versions, take a look [here](https://morpheus-launcher.gitbook.io/home/compatibility) for more informations
