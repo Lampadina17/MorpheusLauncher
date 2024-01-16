@@ -6,7 +6,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 - Compatible with windows, macos, linux
 - Support for Premium and SP accounts
 - Support for Arm®-based processors
-- Compatible with java 8 amd 17
+- Compatible with java 8 and 17
 - Automatic fabric installation
 - Commandline operation
 - Highly scalable code
