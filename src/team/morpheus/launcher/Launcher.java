@@ -344,12 +344,15 @@ public class Launcher {
             URL downloadsource = new URL(String.format("%s/%s", liburl, libpath));
 
             /* check if library isn't present on disk and check if needed library actually is available from download source */
-            int response = ((HttpURLConnection) downloadsource.openConnection()).getResponseCode();
-            if (!libfile.exists() && response == 200) {
-                libfile.mkdirs();
-                ParallelTasks tasks = new ParallelTasks();
-                tasks.add(new DownloadFileTask(downloadsource, libfile.getPath()));
-                tasks.go();
+            try {
+                int response = ((HttpURLConnection) downloadsource.openConnection()).getResponseCode();
+                if (!libfile.exists() && response == 200) {
+                    libfile.mkdirs();
+                    ParallelTasks tasks = new ParallelTasks();
+                    tasks.add(new DownloadFileTask(downloadsource, libfile.getPath()));
+                    tasks.go();
+                }
+            } catch (Exception e) {
             }
 
             /* Append the library path to local list if not present */
