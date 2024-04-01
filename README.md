@@ -1,3 +1,5 @@
+![](https://repository-images.githubusercontent.com/728714946/42abb677-a9ff-45e6-820f-d517dc615ec2)
+
 # Morpheus Launcher
 Universal commandline minecraft launcher based on dynamic classloading
 
