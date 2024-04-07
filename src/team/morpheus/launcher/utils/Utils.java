@@ -1,5 +1,6 @@
 package team.morpheus.launcher.utils;
 
+import team.morpheus.launcher.Main;
 import team.morpheus.launcher.logging.MyLogger;
 
 import java.io.*;
@@ -52,6 +53,7 @@ public class Utils {
     public static String makeGetRequest(URL url) throws IOException {
         HttpURLConnection httpurlconnection = (HttpURLConnection) url.openConnection();
         httpurlconnection.setRequestMethod("GET");
+        httpurlconnection.setRequestProperty("User-Agent", String.format("Morpheus Launcher (%s)", Main.build));
         BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(httpurlconnection.getInputStream()));
         StringBuilder stringbuilder = new StringBuilder();
         String s;
@@ -104,6 +106,8 @@ public class Utils {
             zipInputStream.closeEntry();
             zipInputStream.close();
         } catch (Exception e) {
+            log.error(e.getMessage());
+            e.printStackTrace();
         }
     }
 }
