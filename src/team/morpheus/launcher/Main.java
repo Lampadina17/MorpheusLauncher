@@ -40,9 +40,10 @@ public class Main {
         Option var3 = Option.builder("n").longOpt("minecraftUsername").argName("username").hasArg().desc("Minecraft player username (required)").build();
         Option var4 = Option.builder("t").longOpt("minecraftToken").argName("token").hasArg().desc("Minecraft player token (required)").build();
         Option var5 = Option.builder("u").longOpt("minecraftUUID").argName("uuid").hasArg().desc("Minecraft player uuid (required)").build();
+        Option var7 = Option.builder("c").longOpt("forceClassPath").desc("Forces the use of classpath instead of classloader").build();
 
         Options options = new Options();
-        options.addOption(var0).addOption(var1).addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var6);
+        options.addOption(var0).addOption(var1).addOption(var6).addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7);
         CommandLine cmd = (new DefaultParser()).parse(options, args);
 
         if (cmd.getOptionValue(var3) != null && cmd.getOptionValue(var4) != null && cmd.getOptionValue(var5) != null) {
@@ -51,7 +52,7 @@ public class Main {
 
             /* Select operative mode */
             if (cmd.getOptionValue(var2) != null) {
-                (vanilla = new Vanilla(cmd.getOptionValue(var2))).prepareLaunch();
+                (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7))).prepareLaunch();
             } else if (cmd.getOptionValue(var0) != null && cmd.getOptionValue(var1) != null) {
                 loadNativeLib();
                 (morpheus = new Morpheus(new MorpheusSession(cmd.getOptionValue(var0), cmd.getOptionValue(var1), OSUtils.getHWID()))).prepareLaunch();

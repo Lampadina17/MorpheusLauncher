@@ -37,7 +37,7 @@ public class Launcher {
     private MojangProduct.Game game; // Vanilla / Optifine / Fabric / Forge
     private MojangProduct.Game inherited; // just Vanilla (is parent of modloader)
 
-    public Launcher(String mcVersion, MorpheusProduct product, boolean isModded) throws Exception {
+    public Launcher(String mcVersion, MorpheusProduct product, boolean isModded, boolean useClassPath) throws Exception {
         boolean isLatestVersion = false;
         try {
             /* Get all versions from mojang */
@@ -225,11 +225,28 @@ public class Launcher {
             gameargs.add(Main.getMorpheus().user.data.id);
         }
 
-        /* Launch through classloader
-         * paths: libraries url path
-         * gameargs: game launch arguments
-         * mainclass: the entry point of the game */
-        doClassloading(paths, gameargs, game.mainClass);
+        /* Due compatibility issues some modloaders should run through -cp instead of using dynamic classloading */
+        if (useClassPath) {
+            /* Build classpath */
+            StringBuilder classPath = new StringBuilder();
+            for (URL path : paths) classPath.append(new File(path.toURI()).getPath()).append(";");
+            classPath.append(new File(jarFile.toURI()).getPath());
+            ProcessBuilder processBuilder = new ProcessBuilder("java", String.format("-Djava.library.path=%s", System.getProperty("java.library.path")), "-cp", classPath.toString(), game.mainClass);
+            processBuilder.command().addAll(gameargs);
+
+            /* Start the children process (game) */
+            log.info("Using classpath");
+            Process process = processBuilder.start();
+
+            /* Forward the output from children process into parent process */
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            String line;
+            while ((line = reader.readLine()) != null) System.out.println(line);
+        } else {
+            /* Launch through classloader */
+            log.info("Using classloader");
+            doClassloading(paths, gameargs, game.mainClass);
+        }
     }
 
     public void doFabricSetup(String mcVersion, File jsonFile) throws MalformedURLException, InterruptedException {

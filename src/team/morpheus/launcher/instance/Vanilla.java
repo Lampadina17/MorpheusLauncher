@@ -7,10 +7,12 @@ import team.morpheus.launcher.logging.MyLogger;
 public class Vanilla {
 
     private static final MyLogger log = new MyLogger(Vanilla.class);
-    String mcVersion;
+    private String mcVersion;
+    private boolean useclasspath;
 
-    public Vanilla(String mcVersion) {
+    public Vanilla(String mcVersion, boolean useclasspath) {
         this.mcVersion = mcVersion;
+        this.useclasspath = useclasspath;
     }
 
     public void prepareLaunch() throws Exception {
@@ -21,6 +23,6 @@ public class Vanilla {
                 || mcVersion.toLowerCase().contains("liteloader");
 
         log.info(String.format("Launching %s instance (%s)", !modded ? "Vanilla" : "Modded", mcVersion));
-        new Launcher(mcVersion, null, modded);
+        new Launcher(mcVersion, null, modded, useclasspath);
     }
 }
