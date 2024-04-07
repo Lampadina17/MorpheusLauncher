@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.0.2 | 26_12_2023)";
+    public static final String build = "(v1.0.7 | 07_04_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
@@ -107,26 +107,34 @@ public class Main {
         System.load(nativelibpath);
     }
 
-    /* Vanilla version list */
-    public static final String getVersionsURL() {
+    /* ----- VANILLA ----- */
+    public static final String getVersionsURL() { /* vanilla versions list */
         return "https://launchermeta.mojang.com/mc/game/version_manifest.json";
     }
 
-    /* Vanilla assets */
-    public static final String getAssetsURL() {
+    public static final String getAssetsURL() { /* vanilla game assets */
         return "https://resources.download.minecraft.net";
     }
 
-    public static final String getLibrariesURL() {
+    public static final String getLibrariesURL() { /* vanilla game libraries */
         return "https://libraries.minecraft.net";
     }
 
-    /* Fabric */
-    public static final String getFabricVersionsURL() {
+    /* ----- Fabric ----- */
+    public static final String getFabricVersionsURL() { /* fabric versions list */
         return "https://meta.fabricmc.net/v2/versions";
     }
 
-    /* Morpheus */
+    /* ----- Forge ----- */
+    public static final String getForgeVersionsURL() { /* forge versions list */
+        return "https://files.minecraftforge.net/net/minecraftforge/forge/maven-metadata.json";
+    }
+
+    public static final String getForgeInstallerURL() { /* forge installer base url */
+        return "https://maven.minecraftforge.net/net/minecraftforge/forge/";
+    }
+
+    /* ----- Morpheus ----- */
     public static final String getMorpheusAPI() {
         return "https://morpheuslauncher.it";
     }
