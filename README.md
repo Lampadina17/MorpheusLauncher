@@ -18,6 +18,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 
 # 📘 Installation
 [**Automatic installation (for basic users)**](https://morpheus-launcher.gitbook.io/home/installation/automatic-install)
+
 [**Manual installation (for advanced users)**](https://morpheus-launcher.gitbook.io/home/installation/manual-installation)
 
 # ⬇️ Prebuilt binaries
