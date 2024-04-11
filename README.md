@@ -22,7 +22,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 [**Manual installation (for advanced users)**](https://morpheus-launcher.gitbook.io/home/installation/manual-installation)
 
 # ⬇️ Prebuilt binaries
-[**Download Launcher (cli)**](https://morpheuslauncher.it)
+[**Download Launcher (cli)**](https://morpheuslauncher.it/downloads/Launcher.jar)
 
 # ⚙️ Compiling from sourcecode
 [**Instructions for developers**](https://morpheus-launcher.gitbook.io/home/compiling-from-source)
