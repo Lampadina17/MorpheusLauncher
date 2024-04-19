@@ -286,7 +286,7 @@ public class Launcher {
         /* Pick the last entry */
         String forgeInstallerVersion = candidate.get(candidate.size() - 1);
         URL forgeInstallerUrl = new URL(String.format("%s%s/forge-%s-installer.jar", Main.getForgeInstallerURL(), forgeInstallerVersion, forgeInstallerVersion));
-        File forgeInstallerFile = new File(String.format("%sforge-%s-installer.jar", System.getProperty("java.io.tmpdir"), forgeInstallerVersion));
+        File forgeInstallerFile = new File(String.format("%s/forge-%s-installer.jar", System.getProperty("java.io.tmpdir"), forgeInstallerVersion));
 
         /* Download latest forge for the selected minecraft version*/
         if (!forgeInstallerFile.exists()) {

@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.0.7 | 14_04_2024)";
+    public static final String build = "(v1.0.8 | 19_04_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
