@@ -235,7 +235,7 @@ public class Launcher {
             processBuilder.command().addAll(gameargs);
 
             /* Start the children process (game) */
-            log.info("Using classpath");
+            log.info("Using classpath instead of classloader");
             Process process = processBuilder.start();
 
             /* Forward the output from children process into parent process */
@@ -244,7 +244,6 @@ public class Launcher {
             while ((line = reader.readLine()) != null) System.out.println(line);
         } else {
             /* Launch through classloader */
-            log.info("Using classloader");
             doClassloading(paths, gameargs, game.mainClass);
         }
     }
