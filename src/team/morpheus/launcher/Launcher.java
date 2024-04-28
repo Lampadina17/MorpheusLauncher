@@ -84,16 +84,7 @@ public class Launcher {
             }
 
             /* overwrites id field in json to get better recognition by gui */
-            if (isLatestVersion) {
-                FileReader reader = new FileReader(jsonFile);
-                JSONParser jsonParser = new JSONParser();
-                JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-                jsonObject.replace("id", jsonObject.get("id"), mcVersion);
-                FileWriter writer = new FileWriter(jsonFile);
-                writer.write(jsonObject.toJSONString());
-                writer.flush();
-                writer.close();
-            }
+            if (isLatestVersion) overwriteJsonId(mcVersion, jsonFile);
         }
         String mcLowercase = mcVersion.toLowerCase();
         if (!jsonFile.exists()) {
@@ -101,6 +92,7 @@ public class Launcher {
                 doFabricSetup(mcLowercase, jsonFile);
             } else if (mcLowercase.contains("forge")) {
                 doForgeSetup(mcLowercase, jsonFile);
+                overwriteJsonId(mcVersion, jsonFile);
             }
         }
 
@@ -246,6 +238,17 @@ public class Launcher {
             /* Launch through classloader */
             doClassloading(paths, gameargs, game.mainClass);
         }
+    }
+
+    public void overwriteJsonId(String mcVersion, File jsonFile) throws IOException, ParseException {
+        FileReader reader = new FileReader(jsonFile);
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+        jsonObject.replace("id", jsonObject.get("id"), mcVersion);
+        FileWriter writer = new FileWriter(jsonFile);
+        writer.write(jsonObject.toJSONString());
+        writer.flush();
+        writer.close();
     }
 
     public void doFabricSetup(String mcVersion, File jsonFile) throws MalformedURLException, InterruptedException {
