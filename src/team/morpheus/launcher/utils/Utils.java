@@ -54,6 +54,7 @@ public class Utils {
         HttpURLConnection httpurlconnection = (HttpURLConnection) url.openConnection();
         httpurlconnection.setRequestMethod("GET");
         httpurlconnection.setRequestProperty("User-Agent", String.format("Morpheus Launcher (%s)", Main.build));
+        httpurlconnection.setUseCaches(false);
         BufferedReader bufferedreader = new BufferedReader(new InputStreamReader(httpurlconnection.getInputStream()));
         StringBuilder stringbuilder = new StringBuilder();
         String s;

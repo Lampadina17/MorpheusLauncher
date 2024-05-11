@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.0.9 | 28_04_2024)";
+    public static final String build = "(v1.1.1 | 11_05_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
@@ -133,6 +133,11 @@ public class Main {
 
     public static final String getForgeInstallerURL() { /* forge installer base url */
         return "https://maven.minecraftforge.net/net/minecraftforge/forge/";
+    }
+
+    /* ----- Optifine ----- */
+    public static final String getOptifineVersionsURL() {
+        return "https://morpheuslauncher.it/downloads/optifine.json";
     }
 
     /* ----- Morpheus ----- */

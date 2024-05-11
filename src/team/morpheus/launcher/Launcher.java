@@ -28,7 +28,7 @@ import java.util.zip.ZipFile;
 public class Launcher {
 
     private static final MyLogger log = new MyLogger(Launcher.class);
-    public JSONParser jsonParser = new JSONParser();
+    private JSONParser jsonParser = new JSONParser();
     private File gameFolder, assetsFolder;
 
     private MojangProduct vanilla;
@@ -93,6 +93,8 @@ public class Launcher {
             } else if (mcLowercase.contains("forge")) {
                 doForgeSetup(mcLowercase, jsonFile);
                 overwriteJsonId(mcVersion, jsonFile);
+            } else if (mcLowercase.contains("optifine")) {
+                doOptifineSetup(mcVersion, jsonFile);
             }
         }
 
@@ -240,7 +242,7 @@ public class Launcher {
         }
     }
 
-    public void overwriteJsonId(String mcVersion, File jsonFile) throws IOException, ParseException {
+    private void overwriteJsonId(String mcVersion, File jsonFile) throws IOException, ParseException {
         FileReader reader = new FileReader(jsonFile);
         JSONParser jsonParser = new JSONParser();
         JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
@@ -251,16 +253,17 @@ public class Launcher {
         writer.close();
     }
 
-    public void doFabricSetup(String mcVersion, File jsonFile) throws MalformedURLException, InterruptedException {
+    private void doFabricSetup(String mcVersion, File jsonFile) throws MalformedURLException, InterruptedException {
         String[] split = mcVersion.split("-");
         ParallelTasks tasks = new ParallelTasks();
         tasks.add(new DownloadFileTask(new URL(String.format("%s/loader/%s/%s/profile/json", Main.getFabricVersionsURL(), split[3], split[2])), jsonFile.getPath()));
         tasks.go();
     }
 
-    public void doForgeSetup(String mcLowercase, File jsonFile) throws IOException, ParseException, InterruptedException {
+    private void doForgeSetup(String mcLowercase, File jsonFile) throws IOException, ParseException, InterruptedException {
         /* Fetch forge versions */
         String forgeVersionList = Utils.makeGetRequest(new URL(Main.getForgeVersionsURL()));
+        log.info("Fetching available forge versions");
 
         /* Setup json parsing */
         JSONParser jsonParser = new JSONParser();
@@ -301,7 +304,7 @@ public class Launcher {
     }
 
     /* This function handles the unpacking of the forge installer */
-    public void doForgeUnpack(File forgeInstallerFile, File jsonFile, String forgeLibName) throws ParseException, IOException {
+    private void doForgeUnpack(File forgeInstallerFile, File jsonFile, String forgeLibName) throws ParseException, IOException {
         String[] forgeVersion = forgeLibName.split("-");
         StringBuilder installProfileContent = new StringBuilder();
 
@@ -389,6 +392,118 @@ public class Launcher {
                             outputStream.write(buffer, 0, length);
                         }
                     }
+            }
+        }
+    }
+
+    private void doOptifineSetup(String mcVersion, File jsonFile) throws IOException, ParseException, InterruptedException {
+        /* Fetch optifine versions */
+        String ofVersionList = Utils.makeGetRequest(new URL(Main.getOptifineVersionsURL()));
+
+        /* Setup json parsing */
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(ofVersionList);
+
+        /* Iterate optifine game versions */
+        for (Object key : jsonObject.keySet()) {
+            String versionKey = (String) key;
+            if (mcVersion.toLowerCase().contains(versionKey)) {
+                JSONObject versionList = (JSONObject) jsonObject.get(versionKey);
+
+                /* Prepare optifine installer url */
+                URL ofInstallerURL = new URL(String.format("%s/downloads/extra-optifine/%s.jar", Main.getMorpheusAPI(), versionList.get("name")));
+                File ofInstallerFile = new File(String.format("%s/%s.jar", System.getProperty("java.io.tmpdir"), versionList.get("name")));
+
+                /* Download optifine installer into temp folder */
+                if (!ofInstallerFile.exists()) {
+                    ParallelTasks tasks = new ParallelTasks();
+                    tasks.add(new DownloadFileTask(ofInstallerURL, ofInstallerFile.getPath()));
+                    tasks.go();
+                }
+
+                ZipFile ofInstallerZip = new ZipFile(ofInstallerFile);
+
+                /* Some code for optifine folders and file names */
+                String ofVer = OFUtils.getOptiFineVersion(ofInstallerZip);
+                String[] ofVers = OFUtils.tokenize(ofVer, "_");
+                String mcVer = ofVers[1];
+                String ofEd = OFUtils.getOptiFineEdition(ofVers);
+
+                /* Make optifine library folder */
+                File ofLibraryPath = new File(String.format("%s/libraries/optifine/OptiFine/%s_%s", gameFolder, mcVer, ofEd));
+                if (!ofLibraryPath.exists()) ofLibraryPath.mkdirs();
+
+                /* Copy optifine library to libraries folder */
+                File ofLibraryFile = new File(String.format("%s/OptiFine-%s_%s.jar", ofLibraryPath, mcVer, ofEd));
+                OFUtils.copyFile(ofInstallerFile, ofLibraryFile);
+
+                /* Retrieve launchwrapper version from txt */
+                String launchwrapperVersion = OFUtils.getLaunchwrapperVersion(ofInstallerZip.getInputStream(ofInstallerZip.getEntry("launchwrapper-of.txt")));
+
+                /* Build launchwrapper target folder */
+                File launchwrapperPath = new File(String.format("%s/libraries/optifine/launchwrapper-of/%s", gameFolder, launchwrapperVersion));
+                if (!launchwrapperPath.exists()) launchwrapperPath.mkdirs();
+                String launchwrapperFileName = String.format("launchwrapper-of-%s.jar", launchwrapperVersion);
+                File launchwrapperFile = new File(String.format("%s/%s", launchwrapperPath, launchwrapperFileName));
+
+                InputStream fin = ofInstallerZip.getInputStream(ofInstallerZip.getEntry(launchwrapperFileName));
+                if (fin != null) {
+                    FileOutputStream fout = new FileOutputStream(launchwrapperFile);
+                    OFUtils.copyAll(fin, fout);
+                    fout.flush();
+                    fin.close();
+                    fout.close();
+                }
+
+                /* Download the vanilla json if absent */
+                MojangProduct.Version ver = findVersion(vanilla, mcVer);
+                File vanillaJsonPath = new File(String.format("%s/versions/%s", gameFolder, ver.id));
+                if (!vanillaJsonPath.exists()) vanillaJsonPath.mkdirs();
+
+                File vanillaJsonFile = new File(String.format("%s/%s.json", vanillaJsonPath, ver.id));
+                if (!vanillaJsonFile.exists()) {
+                    ParallelTasks tasks = new ParallelTasks();
+                    tasks.add(new DownloadFileTask(new URL(ver.url), vanillaJsonFile.getPath()));
+                    tasks.go();
+                }
+
+                JSONParser jp = new JSONParser();
+                JSONObject root = (JSONObject) jp.parse(new FileReader(vanillaJsonFile));
+                JSONObject rootNew = new JSONObject();
+                rootNew.put("id", mcVersion);
+                rootNew.put("inheritsFrom", mcVer);
+                rootNew.put("type", "release");
+                JSONArray libs = new JSONArray();
+                rootNew.put("libraries", libs);
+                String mainClass = (String) root.get("mainClass");
+                if (!mainClass.startsWith("net.minecraft.launchwrapper.")) {
+                    mainClass = "net.minecraft.launchwrapper.Launch";
+                    rootNew.put("mainClass", mainClass);
+                    String mcArgs = (String) root.get("minecraftArguments");
+                    JSONObject libLw;
+                    if (mcArgs != null) {
+                        mcArgs = mcArgs + "  --tweakClass optifine.OptiFineTweaker";
+                        rootNew.put("minecraftArguments", mcArgs);
+                    } else {
+                        libLw = new JSONObject();
+                        JSONArray argsGame = new JSONArray();
+                        argsGame.add("--tweakClass");
+                        argsGame.add("optifine.OptiFineTweaker");
+                        libLw.put("game", argsGame);
+                        rootNew.put("arguments", libLw);
+                    }
+                    libLw = new JSONObject();
+                    libLw.put("name", "optifine:launchwrapper-of:" + launchwrapperVersion);
+                    libs.add(0, libLw);
+                }
+                JSONObject libOf = new JSONObject();
+                libOf.put("name", "optifine:OptiFine:" + mcVer + "_" + ofEd);
+                libs.add(0, libOf);
+
+                FileWriter writer = new FileWriter(jsonFile);
+                writer.write(rootNew.toJSONString());
+                writer.flush();
+                writer.close();
             }
         }
     }
