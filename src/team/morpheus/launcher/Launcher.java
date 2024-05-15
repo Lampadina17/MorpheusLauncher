@@ -223,7 +223,7 @@ public class Launcher {
         if (useClassPath) {
             /* Build classpath */
             StringBuilder classPath = new StringBuilder();
-            for (URL path : paths) classPath.append(new File(path.toURI()).getPath()).append(";");
+            for (URL path : paths) classPath.append(new File(path.toURI()).getPath()).append(OSUtils.getPlatform().equals(OSUtils.OS.windows) ? ";" : ":");
             classPath.append(new File(jarFile.toURI()).getPath());
             ProcessBuilder processBuilder = new ProcessBuilder("java", String.format("-Djava.library.path=%s", System.getProperty("java.library.path")), "-cp", classPath.toString(), game.mainClass);
             processBuilder.command().addAll(gameargs);
