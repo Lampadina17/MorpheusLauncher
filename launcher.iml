@@ -15,5 +15,6 @@
     <orderEntry type="library" name="gson-2.10.1" level="project" />
     <orderEntry type="library" name="json-simple-1.1.1" level="project" />
     <orderEntry type="library" name="lombok-1.18.30" level="project" />
+    <orderEntry type="library" name="java-discord-rpc-2.0.1-all" level="project" />
   </component>
 </module>
