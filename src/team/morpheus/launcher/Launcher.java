@@ -233,7 +233,8 @@ public class Launcher {
         if (useClassPath) {
             /* Build classpath */
             StringBuilder classPath = new StringBuilder();
-            for (URL path : paths) classPath.append(new File(path.toURI()).getPath()).append(OSUtils.getPlatform().equals(OSUtils.OS.windows) ? ";" : ":");
+            for (URL path : paths)
+                classPath.append(new File(path.toURI()).getPath()).append(OSUtils.getPlatform().equals(OSUtils.OS.windows) ? ";" : ":");
             classPath.append(new File(jarFile.toURI()).getPath());
             ProcessBuilder processBuilder = new ProcessBuilder("java", String.format("-Djava.library.path=%s", System.getProperty("java.library.path")), "-cp", classPath.toString(), game.mainClass);
             processBuilder.command().addAll(gameargs);
@@ -883,15 +884,5 @@ public class Launcher {
         presence.largeImageKey = "morpheus";
         presence.largeImageText = "";
         lib.Discord_UpdatePresence(presence);
-
-        new Thread(() -> {
-            while (!Thread.currentThread().isInterrupted()) {
-                lib.Discord_RunCallbacks();
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ignored) {
-                }
-            }
-        }, "RPC-Callback-Handler").start();
     }
 }
