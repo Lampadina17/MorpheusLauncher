@@ -1,5 +1,8 @@
 package team.morpheus.launcher;
 
+import club.minnced.discord.rpc.DiscordEventHandlers;
+import club.minnced.discord.rpc.DiscordRPC;
+import club.minnced.discord.rpc.DiscordRichPresence;
 import com.google.gson.Gson;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -156,6 +159,13 @@ public class Launcher {
 
         /* This variable returns ALWAYS the vanilla version, even when you launch modloader */
         MojangProduct.Game vanilla = (inherited != null ? inherited : game);
+
+        /* Catch possible errors to be safe */
+        try {
+            initDiscordRPC(mcLowercase, vanilla.id);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         /* Download natives */
         setupNatives(vanilla, nativesPath);
@@ -696,7 +706,6 @@ public class Launcher {
         /* Find out what cpu architecture is the user machine, assuming they use baremetal os installation */
         String os_arch = OSUtils.getOSArch();
         boolean isArmProcessor = (os_arch.contains("arm") || os_arch.contains("aarch"));
-        boolean isIntelProcessor = (os_arch.contains("x86_64") || os_arch.contains("amd64"));
 
         for (MojangProduct.Game.Library lib : game.libraries) {
             MojangProduct.Game.Classifiers classifiers = lib.downloads.classifiers;
@@ -847,5 +856,42 @@ public class Launcher {
             log.info(String.format("Directory created: %s", temp.getPath()));
         }
         return temp;
+    }
+
+    private static void initDiscordRPC(String mcVersion, String gameVersion) throws Exception {
+        String os_arch = OSUtils.getOSArch();
+        if (!(os_arch.contains("x86") || os_arch.contains("amd64"))) return;
+
+        DiscordRPC lib = DiscordRPC.INSTANCE;
+        DiscordEventHandlers handlers = new DiscordEventHandlers();
+        lib.Discord_Initialize("1061674345405100082", handlers, true, "");
+        DiscordRichPresence presence = new DiscordRichPresence();
+
+        String gameType = "vanilla";
+        if (mcVersion.contains("forge")) {
+            gameType = "forge";
+        } else if (mcVersion.contains("fabric")) {
+            gameType = "fabric";
+        } else if (mcVersion.contains("optifine")) {
+            gameType = "optifine";
+        } else if (mcVersion.contains("quilt")) {
+            gameType = "quilt";
+        }
+
+        presence.startTimestamp = System.currentTimeMillis() / 1000;
+        presence.details = String.format("Playing: %s %s", gameType, gameVersion);
+        presence.largeImageKey = "morpheus";
+        presence.largeImageText = "";
+        lib.Discord_UpdatePresence(presence);
+
+        new Thread(() -> {
+            while (!Thread.currentThread().isInterrupted()) {
+                lib.Discord_RunCallbacks();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }, "RPC-Callback-Handler").start();
     }
 }
