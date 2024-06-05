@@ -160,13 +160,6 @@ public class Launcher {
         /* This variable returns ALWAYS the vanilla version, even when you launch modloader */
         MojangProduct.Game vanilla = (inherited != null ? inherited : game);
 
-        /* Catch possible errors to be safe */
-        try {
-            initDiscordRPC(mcLowercase, vanilla.id);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         /* Download natives */
         setupNatives(vanilla, nativesPath);
 
@@ -219,6 +212,8 @@ public class Launcher {
             }
 
             if (paths.add(jarFile.toURI().toURL())) log.info(String.format("loading: %s", jarFile.toURI().toURL()));
+
+            initDiscordRPC(buildRPCstatus(mcLowercase, vanilla.id));
         } else if (Main.getMorpheus() != null) {
             /* You can ignore this */
             paths.addAll(setupLibraries(vanilla)); /* Append vanilla libraries */
@@ -227,6 +222,8 @@ public class Launcher {
 
             gameargs.add("-morpheusID");
             gameargs.add(Main.getMorpheus().user.data.id);
+
+            initDiscordRPC(String.format("%s %s", product.data.name.replace(".jar", ""), product.data.version));
         }
 
         /* Due compatibility issues some modloaders should run through -cp instead of using dynamic classloading */
@@ -859,7 +856,7 @@ public class Launcher {
         return temp;
     }
 
-    private static void initDiscordRPC(String mcVersion, String gameVersion) throws Exception {
+    private static void initDiscordRPC(String status) throws Exception {
         String os_arch = OSUtils.getOSArch();
         if (!(os_arch.contains("x86") || os_arch.contains("amd64"))) return;
 
@@ -868,6 +865,14 @@ public class Launcher {
         lib.Discord_Initialize("1061674345405100082", handlers, true, "");
         DiscordRichPresence presence = new DiscordRichPresence();
 
+        presence.startTimestamp = System.currentTimeMillis() / 1000;
+        presence.details = String.format("Playing: %s", status);
+        presence.largeImageKey = "morpheus";
+        presence.largeImageText = "";
+        lib.Discord_UpdatePresence(presence);
+    }
+
+    private static String buildRPCstatus(String mcVersion, String gameVersion) {
         String gameType = "vanilla";
         if (mcVersion.contains("forge")) {
             gameType = "forge";
@@ -878,11 +883,6 @@ public class Launcher {
         } else if (mcVersion.contains("quilt")) {
             gameType = "quilt";
         }
-
-        presence.startTimestamp = System.currentTimeMillis() / 1000;
-        presence.details = String.format("Playing: %s %s", gameType, gameVersion);
-        presence.largeImageKey = "morpheus";
-        presence.largeImageText = "";
-        lib.Discord_UpdatePresence(presence);
+        return String.format("%s %s", gameType, gameVersion);
     }
 }
