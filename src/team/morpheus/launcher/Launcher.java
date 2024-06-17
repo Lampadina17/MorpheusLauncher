@@ -704,6 +704,7 @@ public class Launcher {
         /* Find out what cpu architecture is the user machine, assuming they use baremetal os installation */
         String os_arch = OSUtils.getOSArch();
         boolean isArmProcessor = (os_arch.contains("arm") || os_arch.contains("aarch"));
+        boolean isRiscVProcessor = os_arch.contains("riscv64");
 
         for (MojangProduct.Game.Library lib : game.libraries) {
             MojangProduct.Game.Classifiers classifiers = lib.downloads.classifiers;
@@ -774,33 +775,44 @@ public class Launcher {
             }
         }
         /* Additional code to download missing arm natives */
-        if (isArmProcessor) for (MojangProduct.Game.Library lib : game.libraries) {
-            switch (OSUtils.getPlatform()) {
-                case macos:
-                    // LWJGL 2.X (up to 1.12.2)
-                    // I hope this work and i don't have an apple silicon machine to test if works
-                    if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_osx != null && lib.downloads.classifiers.natives_osx.url.contains("lwjgl-platform-2")) {
-                        String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-macos-aarch64.zip", Main.getMorpheusAPI());
-                        Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                    }
-                    break;
-                case linux:
-                    // LWJGL 2.X (up to 1.12.2)
-                    if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
-                        String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-aarch64.zip", Main.getMorpheusAPI());
-                        Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                    }
-                    // LWJGL 3.3 (1.19+)
-                    if (lib.name.contains("native") && lib.rules != null && checkRule(lib.rules) && lib.name.contains("lwjgl")) {
-                        String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-3.3-linux-aarch64.zip", Main.getMorpheusAPI());
-                        Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                    }
-                    break;
+        if (isArmProcessor || isRiscVProcessor)
+            for (MojangProduct.Game.Library lib : game.libraries) {
+                switch (OSUtils.getPlatform()) {
+                    case macos:
+                        if (!isArmProcessor) break; // if isn't apple silicon mac skip
+
+                        // LWJGL 2.X (up to 1.12.2)
+                        if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_osx != null && lib.downloads.classifiers.natives_osx.url.contains("lwjgl-platform-2")) {
+                            String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-macos-aarch64.zip", Main.getMorpheusAPI());
+                            Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                            log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                        }
+                        break;
+                    case linux:
+                        if (isArmProcessor) {
+                            // LWJGL 2.X (up to 1.12.2)
+                            if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
+                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-aarch64.zip", Main.getMorpheusAPI());
+                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                            }
+                            // LWJGL 3.3 (1.19+)
+                            if (lib.name.contains("native") && lib.rules != null && checkRule(lib.rules) && lib.name.contains("lwjgl")) {
+                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-3.3-linux-aarch64.zip", Main.getMorpheusAPI());
+                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                            }
+                        } else if (isRiscVProcessor) {
+                            // LWJGL 2.X (up to 1.12.2)
+                            if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
+                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-riscv64.zip", Main.getMorpheusAPI());
+                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                            }
+                        }
+                        break;
+                }
             }
-        }
     }
 
     private void setupAssets(MojangProduct.Game game) throws IOException, ParseException, InterruptedException {
