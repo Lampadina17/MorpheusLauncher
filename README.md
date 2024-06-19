@@ -5,10 +5,10 @@ Universal commandline minecraft launcher based on dynamic classloading
 
 # ⚡ Features
 - Compatible with vanilla, optifine, fabric, forge*
+- Automatic fabric, forge and optifine installation
 - Compatible with windows, macos, linux
 - Support for Arm® and Risc-V processors
 - Support for Premium and SP accounts
-- Automatic fabric installation
 - Compatible with java 8+
 - Commandline operation
 - Highly scalable code
