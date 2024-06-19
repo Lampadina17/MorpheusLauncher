@@ -7,7 +7,7 @@ Universal commandline minecraft launcher based on dynamic classloading
 - Compatible with vanilla, optifine, fabric, forge*
 - Compatible with windows, macos, linux
 - Support for Premium and SP accounts
-- Support for Arm®-based processors
+- Support for Arm® and Risc-V processors
 - Compatible with java 8 and 17
 - Automatic fabric installation
 - Commandline operation
@@ -26,12 +26,6 @@ Universal commandline minecraft launcher based on dynamic classloading
 
 # ⚙️ Compiling from sourcecode
 [**Instructions for developers**](https://morpheus-launcher.gitbook.io/home/compiling-from-source)
-
-# 📦 Maven Dependencies
-- commons.cli
-- google.code.gson
-- googlecode.json.simple
-- projectlombok.lombok
 
 # 📣 Need more help?
 - Official launcher wiki: https://morpheus-launcher.gitbook.io/home/
