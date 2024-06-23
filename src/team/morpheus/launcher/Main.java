@@ -17,7 +17,7 @@ import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.1.6 | 17_06_2024)";
+    public static final String build = "(v1.1.7 | 23_06_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
     @Getter
     private static Morpheus morpheus;
@@ -41,10 +41,13 @@ public class Main {
         Option var4 = Option.builder("t").longOpt("minecraftToken").argName("token").hasArg().desc("Minecraft player token (required)").build();
         Option var5 = Option.builder("u").longOpt("minecraftUUID").argName("uuid").hasArg().desc("Minecraft player uuid (required)").build();
         Option var7 = Option.builder("c").longOpt("forceClassPath").desc("Forces the use of classpath instead of classloader").build();
+        Option var8 = Option.builder("f").longOpt("gameFolder").argName("path").hasArg().desc("Uses the user given path instead of .minecraft").build();
 
         Options options = new Options();
-        options.addOption(var0).addOption(var1).addOption(var6).addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7);
+        options.addOption(var0).addOption(var1).addOption(var6).addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7).addOption(var8);
         CommandLine cmd = (new DefaultParser()).parse(options, args);
+
+        String gameFolder = cmd.hasOption(var8) ? cmd.getOptionValue(var8) : OSUtils.getWorkingDirectory("minecraft").getPath();
 
         if (cmd.getOptionValue(var3) != null && cmd.getOptionValue(var4) != null && cmd.getOptionValue(var5) != null) {
             /* Setup minecraft session */
@@ -52,10 +55,10 @@ public class Main {
 
             /* Select operative mode */
             if (cmd.getOptionValue(var2) != null) {
-                (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7))).prepareLaunch();
+                (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7))).prepareLaunch(gameFolder);
             } else if (cmd.getOptionValue(var0) != null && cmd.getOptionValue(var1) != null) {
                 loadNativeLib();
-                (morpheus = new Morpheus(new MorpheusSession(cmd.getOptionValue(var0), cmd.getOptionValue(var1), OSUtils.getHWID()))).prepareLaunch();
+                (morpheus = new Morpheus(new MorpheusSession(cmd.getOptionValue(var0), cmd.getOptionValue(var1), OSUtils.getHWID()))).prepareLaunch(gameFolder);
             }
         } else {
             if (cmd.hasOption(var6)) {

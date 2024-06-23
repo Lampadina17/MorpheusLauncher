@@ -7,9 +7,11 @@ import org.json.simple.parser.ParseException;
 import team.morpheus.launcher.Launcher;
 import team.morpheus.launcher.Main;
 import team.morpheus.launcher.logging.MyLogger;
+import team.morpheus.launcher.model.LauncherVariables;
 import team.morpheus.launcher.model.MorpheusSession;
 import team.morpheus.launcher.model.MorpheusUser;
 import team.morpheus.launcher.model.products.MorpheusProduct;
+import team.morpheus.launcher.utils.OSUtils;
 import team.morpheus.launcher.utils.Utils;
 
 import java.io.IOException;
@@ -29,7 +31,7 @@ public class Morpheus {
         this.session = session;
     }
 
-    public void prepareLaunch() throws Exception {
+    public void prepareLaunch(String gamePath) throws Exception {
         /* Ask server user json */
         HashMap<String, String> map = new HashMap<>();
         map.put("accessToken", session.getSessionToken());
@@ -79,7 +81,7 @@ public class Morpheus {
 
         /* Invoke launcher class with client instance */
         log.info(String.format("Launching custom instance (%s %s) based on %s", prod.data.name.replace(".jar", ""), prod.data.version, prod.data.gameversion));
-        new Launcher(prod.data.gameversion, prod, false, false);
+        new Launcher(new LauncherVariables(prod.data.gameversion, false, false, gamePath), prod);
     }
 
     public String getErrorMessage(HttpURLConnection conn, String json) throws IOException, ParseException {

@@ -9,6 +9,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import team.morpheus.launcher.logging.MyLogger;
+import team.morpheus.launcher.model.LauncherVariables;
 import team.morpheus.launcher.model.products.MojangProduct;
 import team.morpheus.launcher.model.products.MorpheusProduct;
 import team.morpheus.launcher.utils.*;
@@ -40,20 +41,20 @@ public class Launcher {
     private MojangProduct.Game game; // Vanilla / Optifine / Fabric / Forge
     private MojangProduct.Game inherited; // just Vanilla (is parent of modloader)
 
-    public Launcher(String mcVersion, MorpheusProduct product, boolean isModded, boolean useClassPath) throws Exception {
+    public Launcher(LauncherVariables variables, MorpheusProduct product) throws Exception {
         boolean isLatestVersion = false;
         try {
             /* Get all versions from mojang */
             vanilla = retrieveVersions();
 
             /* Find version by name gave by user */
-            String targetName = mcVersion;
+            String targetName = variables.getMcVersion();
 
-            if (mcVersion.equalsIgnoreCase("latest")) {
+            if (variables.getMcVersion().equalsIgnoreCase("latest")) {
                 targetName = vanilla.latest.release;
                 isLatestVersion = true;
             }
-            if (mcVersion.equalsIgnoreCase("snapshot")) {
+            if (variables.getMcVersion().equalsIgnoreCase("snapshot")) {
                 targetName = vanilla.latest.snapshot;
                 isLatestVersion = true;
             }
@@ -64,16 +65,16 @@ public class Launcher {
         }
 
         // Make .minecraft/
-        gameFolder = makeDirectory(OSUtils.getWorkingDirectory("minecraft").getPath());
+        gameFolder = makeDirectory(variables.getGamePath());
 
         // Make .minecraft/assets/
         assetsFolder = makeDirectory(String.format("%s/assets", gameFolder.getPath()));
 
         // Make .minecraft/versions/<gameVersion>
-        File versionPath = makeDirectory(String.format("%s/versions/%s", gameFolder.getPath(), mcVersion));
+        File versionPath = makeDirectory(String.format("%s/versions/%s", gameFolder.getPath(), variables.getMcVersion()));
 
         // Download json to .minecraft/versions/<gameVersion>/<gameVersion.json
-        File jsonFile = new File(String.format("%s/%s.json", versionPath.getPath(), mcVersion));
+        File jsonFile = new File(String.format("%s/%s.json", versionPath.getPath(), variables.getMcVersion()));
         if (target != null && target.url != null) {
             /* Extract json file hash from download url */
             String jsonHash = target.url.substring(target.url.lastIndexOf("/") - 40, target.url.lastIndexOf("/"));
@@ -87,17 +88,17 @@ public class Launcher {
             }
 
             /* overwrites id field in json to get better recognition by gui */
-            if (isLatestVersion) overwriteJsonId(mcVersion, jsonFile);
+            if (isLatestVersion) overwriteJsonId(variables.getMcVersion(), jsonFile);
         }
-        String mcLowercase = mcVersion.toLowerCase();
+        String mcLowercase = variables.getMcVersion().toLowerCase();
         if (!jsonFile.exists()) {
             if (mcLowercase.contains("fabric")) {
                 doFabricSetup(mcLowercase, jsonFile);
             } else if (mcLowercase.contains("forge")) {
                 doForgeSetup(mcLowercase, jsonFile);
-                overwriteJsonId(mcVersion, jsonFile);
+                overwriteJsonId(variables.getMcVersion(), jsonFile);
             } else if (mcLowercase.contains("optifine")) {
-                doOptifineSetup(mcVersion, jsonFile);
+                doOptifineSetup(variables.getMcVersion(), jsonFile);
             }
         }
 
@@ -105,7 +106,7 @@ public class Launcher {
         game = retrieveGame(jsonFile);
 
         /* Download vanilla jar to .minecraft/versions/<gameVersion>/<gameVersion.jar */
-        File jarFile = new File(String.format("%s/%s.jar", versionPath.getPath(), mcVersion));
+        File jarFile = new File(String.format("%s/%s.jar", versionPath.getPath(), variables.getMcVersion()));
         if (game.downloads != null && game.downloads.client != null) {
             String jarHash = game.downloads.client.sha1;
 
@@ -198,7 +199,7 @@ public class Launcher {
 
         /* Put the client jar to url list */
         if (Main.getVanilla() != null) {
-            if (isModded) {
+            if (variables.isModded()) {
                 paths.addAll(setupLibraries(game));  /* Append modloader libraries if the game is modded */
                 paths.addAll(setupLibraries(vanilla)); /* Append vanilla libraries */
 
@@ -227,7 +228,7 @@ public class Launcher {
         }
 
         /* Due compatibility issues some modloaders should run through -cp instead of using dynamic classloading */
-        if (useClassPath) {
+        if (variables.isClassPath()) {
             /* Build classpath */
             StringBuilder classPath = new StringBuilder();
             for (URL path : paths)
