@@ -234,7 +234,25 @@ public class Launcher {
             for (URL path : paths)
                 classPath.append(new File(path.toURI()).getPath()).append(OSUtils.getPlatform().equals(OSUtils.OS.windows) ? ";" : ":");
             classPath.append(new File(jarFile.toURI()).getPath());
-            ProcessBuilder processBuilder = new ProcessBuilder("java", String.format("-Djava.library.path=%s", System.getProperty("java.library.path")), "-cp", classPath.toString(), game.mainClass);
+
+            String librarypath = String.format("-Djava.library.path=%s", System.getProperty("java.library.path"));
+            String jnapath = String.format("-Djna.tmpdir=%s", System.getProperty("java.library.path"));
+            String lwjglpath = String.format("-Dorg.lwjgl.system.SharedLibraryExtractPath=%s", System.getProperty("java.library.path"));
+            String nettypath = String.format("-Dio.netty.native.workdir=%s", System.getProperty("java.library.path"));
+
+            List<String> command = new ArrayList<>();
+            command.add("java");
+            if (variables.isStartOnFirstThread()) {
+                command.add("-XstartOnFirstThread");
+            }
+            command.add(librarypath);
+            command.add(jnapath);
+            command.add(lwjglpath);
+            command.add(nettypath);
+            command.add("-cp");
+            command.add(classPath.toString());
+            command.add(game.mainClass);
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
             processBuilder.command().addAll(gameargs);
 
             /* Start the children process (game) */

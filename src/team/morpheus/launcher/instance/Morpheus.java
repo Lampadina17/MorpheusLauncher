@@ -81,7 +81,7 @@ public class Morpheus {
 
         /* Invoke launcher class with client instance */
         log.info(String.format("Launching custom instance (%s %s) based on %s", prod.data.name.replace(".jar", ""), prod.data.version, prod.data.gameversion));
-        new Launcher(new LauncherVariables(prod.data.gameversion, false, false, gamePath), prod);
+        new Launcher(new LauncherVariables(prod.data.gameversion, false, false, gamePath, false), prod);
     }
 
     public String getErrorMessage(HttpURLConnection conn, String json) throws IOException, ParseException {

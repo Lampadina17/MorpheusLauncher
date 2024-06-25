@@ -17,7 +17,7 @@ public class Vanilla {
         this.useclasspath = useclasspath;
     }
 
-    public void prepareLaunch(String gamePath) throws Exception {
+    public void prepareLaunch(String gamePath, boolean startOnFirstThread) throws Exception {
         boolean modded = mcVersion.toLowerCase().contains("fabric")
                 || mcVersion.toLowerCase().contains("forge")
                 || mcVersion.toLowerCase().contains("quilt")
@@ -25,6 +25,6 @@ public class Vanilla {
                 || mcVersion.toLowerCase().contains("liteloader");
 
         log.info(String.format("Launching %s instance (%s)", !modded ? "Vanilla" : "Modded", mcVersion));
-        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath), null);
+        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath, startOnFirstThread), null);
     }
 }
