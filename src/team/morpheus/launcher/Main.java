@@ -5,22 +5,16 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import team.morpheus.launcher.instance.Morpheus;
 import team.morpheus.launcher.instance.Vanilla;
 import team.morpheus.launcher.logging.MyLogger;
 import team.morpheus.launcher.model.MojangSession;
-import team.morpheus.launcher.model.MorpheusSession;
 import team.morpheus.launcher.utils.OSUtils;
-
-import javax.swing.*;
-import java.io.File;
 
 public class Main {
 
-    public static final String build = "(v1.1.7 | 23_06_2024)";
+    public static final String build = "(v2.1.0 | 31_07_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
-    @Getter
-    private static Morpheus morpheus;
+
     @Getter
     private static Vanilla vanilla;
     @Getter
@@ -30,12 +24,6 @@ public class Main {
     public static void main(String[] args) throws Exception {
         log.info(String.format("Morpheus Launcher %s | Lampadina_17 (by-nc-sa)", build));
 
-        /* Morpheus product's related arguments, most people can ignore this */
-        Option var0 = Option.builder("a").longOpt("accessToken").argName("token").hasArg().desc("").build();
-        Option var1 = Option.builder("p").longOpt("productID").argName("productid").hasArg().desc("").build();
-        Option var6 = Option.builder("h").longOpt("hwid").argName("showpopup").hasArg().optionalArg(true).desc("Prints hardware-id into a message dialog").build();
-
-        /* Vanilla related arguments */
         Option var2 = Option.builder("v").longOpt("version").argName("version").hasArg().desc("Minecraft version to be launched").build();
         Option var3 = Option.builder("n").longOpt("minecraftUsername").argName("username").hasArg().desc("Minecraft player username (required)").build();
         Option var4 = Option.builder("t").longOpt("minecraftToken").argName("token").hasArg().desc("Minecraft player token (required)").build();
@@ -44,7 +32,7 @@ public class Main {
         Option var8 = Option.builder("f").longOpt("gameFolder").argName("path").hasArg().desc("Uses the user given path instead of .minecraft").build();
 
         Options options = new Options();
-        options.addOption(var0).addOption(var1).addOption(var6).addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7).addOption(var8);
+        options.addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7).addOption(var8);
         CommandLine cmd = (new DefaultParser()).parse(options, args);
 
         String gameFolder = cmd.hasOption(var8) ? cmd.getOptionValue(var8) : OSUtils.getWorkingDirectory("minecraft").getPath();
@@ -56,26 +44,10 @@ public class Main {
             /* Select operative mode */
             if (cmd.getOptionValue(var2) != null) {
                 (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7))).prepareLaunch(gameFolder);
-            } else if (cmd.getOptionValue(var0) != null && cmd.getOptionValue(var1) != null) {
-                loadNativeLib();
-                (morpheus = new Morpheus(new MorpheusSession(cmd.getOptionValue(var0), cmd.getOptionValue(var1), OSUtils.getHWID()))).prepareLaunch(gameFolder);
             }
         } else {
-            if (cmd.hasOption(var6)) {
-                loadNativeLib();
-                /* Print HWID */
-                String hwid = OSUtils.getHWID();
-                log.info(String.format("HWID: %s", hwid));
-                String showPopupValue = cmd.getOptionValue(var6);
-                if (showPopupValue != null && showPopupValue.equalsIgnoreCase("true")) {
-                    copyToClipboard(hwid);
-                    JOptionPane.showMessageDialog(null, "Hwid has successfully copied to your clipboard!");
-                }
-                System.exit(0);
-            } else {
-                /* Print Help */
-                printHelp(options);
-            }
+            /* Print Help */
+            printHelp(options);
         }
     }
 
@@ -92,23 +64,6 @@ public class Main {
         java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
         java.awt.datatransfer.StringSelection selection = new java.awt.datatransfer.StringSelection(text);
         clipboard.setContents(selection, null);
-    }
-
-    /* Loads morpheusguard dynamic library only when needed, for most users this is useless */
-    public static void loadNativeLib() {
-        String nativelibpath = OSUtils.getWorkingDirectory("morpheus").getPath() + File.separator;
-        switch (OSUtils.getPlatform()) {
-            case windows:
-                nativelibpath += "morpheus_guard.dll";
-                break;
-            case macos:
-                nativelibpath += "libmorpheus_guard.dylib";
-                break;
-            case linux:
-                nativelibpath += "libmorpheus_guard.so";
-                break;
-        }
-        System.load(nativelibpath);
     }
 
     /* ----- VANILLA ----- */

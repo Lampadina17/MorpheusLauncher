@@ -11,7 +11,6 @@ import org.json.simple.parser.ParseException;
 import team.morpheus.launcher.logging.MyLogger;
 import team.morpheus.launcher.model.LauncherVariables;
 import team.morpheus.launcher.model.products.MojangProduct;
-import team.morpheus.launcher.model.products.MorpheusProduct;
 import team.morpheus.launcher.utils.*;
 
 import java.io.*;
@@ -41,7 +40,7 @@ public class Launcher {
     private MojangProduct.Game game; // Vanilla / Optifine / Fabric / Forge
     private MojangProduct.Game inherited; // just Vanilla (is parent of modloader)
 
-    public Launcher(LauncherVariables variables, MorpheusProduct product) throws Exception {
+    public Launcher(LauncherVariables variables) throws Exception {
         boolean isLatestVersion = false;
         try {
             /* Get all versions from mojang */
@@ -215,16 +214,6 @@ public class Launcher {
             if (paths.add(jarFile.toURI().toURL())) log.info(String.format("loading: %s", jarFile.toURI().toURL()));
 
             initDiscordRPC(buildRPCstatus(mcLowercase, vanilla.id));
-        } else if (Main.getMorpheus() != null) {
-            /* You can ignore this */
-            paths.addAll(setupLibraries(vanilla)); /* Append vanilla libraries */
-            paths = replacePaths(paths); /* Update Log4j */
-            paths.addAll(setupMorpheusPaths(product)); /* Append custom jars */
-
-            gameargs.add("-morpheusID");
-            gameargs.add(Main.getMorpheus().user.data.id);
-
-            initDiscordRPC(String.format("%s %s", product.data.name.replace(".jar", ""), product.data.version));
         }
 
         /* Due compatibility issues some modloaders should run through -cp instead of using dynamic classloading */
@@ -650,42 +639,6 @@ public class Launcher {
         return paths;
     }
 
-    /* Used only for morpheus products, you can ignore this */
-    private List<URL> setupMorpheusPaths(MorpheusProduct product) throws MalformedURLException {
-        List<URL> paths = new ArrayList<>();
-        String query = "%s/api/download?accessToken=%s&productID=%s&resourcePath=%s";
-
-        /* dependencies to be classloaded */
-        for (MorpheusProduct.Library customLib : product.data.libraries) {
-            URL customLibUrl = new URL(String.format(query, Main.getMorpheusAPI(), Main.getMorpheus().session.getSessionToken(), Main.getMorpheus().session.getProductID(), customLib.name));
-            if (paths.add(customLibUrl)) log.info(String.format("Dynamic Loading: %s", customLib.name));
-        }
-
-        /* client to be classloaded */
-        URL customJarUrl = new URL(String.format(query, Main.getMorpheusAPI(), Main.getMorpheus().session.getSessionToken(), Main.getMorpheus().session.getProductID(), product.data.name));
-        if (paths.add(customJarUrl)) log.info(String.format("Dynamic Loading: %s", product.data.name));
-        return paths;
-    }
-
-    /* Replaces certain entries from classpaths */
-    private List<URL> replacePaths(List<URL> paths) throws MalformedURLException, URISyntaxException {
-        List<URL> updatedPaths = new ArrayList<>();
-        for (URL path : paths) {
-            if (path.getPath().contains("log4j-core")) {
-                URL log4jcore = new URL("https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-core/2.21.0/log4j-core-2.21.0.jar");
-                updatedPaths.add(log4jcore);
-                log.info(String.format("Swapped: %s with %s", path.getPath(), log4jcore.toURI().toURL()));
-            } else if (path.getPath().contains("log4j-api")) {
-                URL log4japi = new URL("https://repo1.maven.org/maven2/org/apache/logging/log4j/log4j-api/2.21.0/log4j-api-2.21.0.jar");
-                updatedPaths.add(log4japi);
-                log.info(String.format("Swapped: %s with %s", path.getPath(), log4japi.toURI().toURL()));
-            } else {
-                updatedPaths.add(path);
-            }
-        }
-        return updatedPaths;
-    }
-
     /* this determine which library should be used, some minecraft versions need to use
      * a different library version to work on certain systems, pratically are "Exceptions"
      * WARNING: Potentially bugged and may not follow what mojang json want do */
@@ -776,44 +729,43 @@ public class Launcher {
             }
         }
         /* Additional code to download missing arm natives */
-        if (isArmProcessor || isRiscVProcessor)
-            for (MojangProduct.Game.Library lib : game.libraries) {
-                switch (OSUtils.getPlatform()) {
-                    case macos:
-                        if (!isArmProcessor) break; // if isn't apple silicon mac skip
+        if (isArmProcessor || isRiscVProcessor) for (MojangProduct.Game.Library lib : game.libraries) {
+            switch (OSUtils.getPlatform()) {
+                case macos:
+                    if (!isArmProcessor) break; // if isn't apple silicon mac skip
 
+                    // LWJGL 2.X (up to 1.12.2)
+                    if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_osx != null && lib.downloads.classifiers.natives_osx.url.contains("lwjgl-platform-2")) {
+                        String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-macos-aarch64.zip", Main.getMorpheusAPI());
+                        Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                        log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                    }
+                    break;
+                case linux:
+                    if (isArmProcessor) {
                         // LWJGL 2.X (up to 1.12.2)
-                        if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_osx != null && lib.downloads.classifiers.natives_osx.url.contains("lwjgl-platform-2")) {
-                            String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-macos-aarch64.zip", Main.getMorpheusAPI());
+                        if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
+                            String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-aarch64.zip", Main.getMorpheusAPI());
                             Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
                             log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
                         }
-                        break;
-                    case linux:
-                        if (isArmProcessor) {
-                            // LWJGL 2.X (up to 1.12.2)
-                            if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
-                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-aarch64.zip", Main.getMorpheusAPI());
-                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                            }
-                            // LWJGL 3.3 (1.19+)
-                            if (lib.name.contains("native") && lib.rules != null && checkRule(lib.rules) && lib.name.contains("lwjgl")) {
-                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-3.3-linux-aarch64.zip", Main.getMorpheusAPI());
-                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                            }
-                        } else if (isRiscVProcessor) {
-                            // LWJGL 2.X (up to 1.12.2)
-                            if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
-                                String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-riscv64.zip", Main.getMorpheusAPI());
-                                Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
-                                log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
-                            }
+                        // LWJGL 3.3 (1.19+)
+                        if (lib.name.contains("native") && lib.rules != null && checkRule(lib.rules) && lib.name.contains("lwjgl")) {
+                            String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-3.3-linux-aarch64.zip", Main.getMorpheusAPI());
+                            Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                            log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
                         }
-                        break;
-                }
+                    } else if (isRiscVProcessor) {
+                        // LWJGL 2.X (up to 1.12.2)
+                        if (lib.downloads.classifiers != null && lib.downloads.classifiers.natives_linux != null && lib.downloads.classifiers.natives_linux.url.contains("lwjgl-platform-2")) {
+                            String zipUrl = String.format("%s/downloads/extra-natives/lwjgl-2-linux-riscv64.zip", Main.getMorpheusAPI());
+                            Utils.downloadAndUnzipNatives(new URL(zipUrl), nativesFolder, log);
+                            log.info(String.format("Downloaded and extracted %s for %s", zipUrl, OSUtils.getPlatform()));
+                        }
+                    }
+                    break;
             }
+        }
     }
 
     private void setupAssets(MojangProduct.Game game) throws IOException, ParseException, InterruptedException {

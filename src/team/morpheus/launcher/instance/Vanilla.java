@@ -3,7 +3,6 @@ package team.morpheus.launcher.instance;
 import team.morpheus.launcher.Launcher;
 import team.morpheus.launcher.logging.MyLogger;
 import team.morpheus.launcher.model.LauncherVariables;
-import team.morpheus.launcher.utils.OSUtils;
 
 
 public class Vanilla {
@@ -25,6 +24,6 @@ public class Vanilla {
                 || mcVersion.toLowerCase().contains("liteloader");
 
         log.info(String.format("Launching %s instance (%s)", !modded ? "Vanilla" : "Modded", mcVersion));
-        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath), null);
+        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath));
     }
 }
