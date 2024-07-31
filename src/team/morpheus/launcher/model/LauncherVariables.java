@@ -11,4 +11,5 @@ public class LauncherVariables {
     private boolean modded;
     private boolean classPath;
     private String gamePath;
+    private boolean startOnFirstThread;
 }
