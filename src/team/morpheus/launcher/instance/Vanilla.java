@@ -10,10 +10,12 @@ public class Vanilla {
     private static final MyLogger log = new MyLogger(Vanilla.class);
     private String mcVersion;
     private boolean useclasspath;
+    private boolean startonfirstthread;
 
-    public Vanilla(String mcVersion, boolean useclasspath) {
+    public Vanilla(String mcVersion, boolean useclasspath, boolean startonfirstthread) {
         this.mcVersion = mcVersion;
         this.useclasspath = useclasspath;
+        this.startonfirstthread = startonfirstthread;
     }
 
     public void prepareLaunch(String gamePath) throws Exception {
@@ -24,6 +26,6 @@ public class Vanilla {
                 || mcVersion.toLowerCase().contains("liteloader");
 
         log.info(String.format("Launching %s instance (%s)", !modded ? "Vanilla" : "Modded", mcVersion));
-        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath));
+        new Launcher(new LauncherVariables(mcVersion, modded, useclasspath, gamePath, startonfirstthread));
     }
 }

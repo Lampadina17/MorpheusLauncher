@@ -12,7 +12,7 @@ import team.morpheus.launcher.utils.OSUtils;
 
 public class Main {
 
-    public static final String build = "(v2.1.0 | 31_07_2024)";
+    public static final String build = "(v2.1.0 | 18_08_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
 
     @Getter
@@ -30,9 +30,10 @@ public class Main {
         Option var5 = Option.builder("u").longOpt("minecraftUUID").argName("uuid").hasArg().desc("Minecraft player uuid (required)").build();
         Option var7 = Option.builder("c").longOpt("forceClassPath").desc("Forces the use of classpath instead of classloader").build();
         Option var8 = Option.builder("f").longOpt("gameFolder").argName("path").hasArg().desc("Uses the user given path instead of .minecraft").build();
+        Option var9 = Option.builder("x").longOpt("startOnFirstThread").desc("Starts the game on first thread (macos)").build();
 
         Options options = new Options();
-        options.addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7).addOption(var8);
+        options.addOption(var2).addOption(var3).addOption(var4).addOption(var5).addOption(var7).addOption(var8).addOption(var9);
         CommandLine cmd = (new DefaultParser()).parse(options, args);
 
         String gameFolder = cmd.hasOption(var8) ? cmd.getOptionValue(var8) : OSUtils.getWorkingDirectory("minecraft").getPath();
@@ -43,7 +44,7 @@ public class Main {
 
             /* Select operative mode */
             if (cmd.getOptionValue(var2) != null) {
-                (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7))).prepareLaunch(gameFolder);
+                (vanilla = new Vanilla(cmd.getOptionValue(var2), cmd.hasOption(var7), cmd.hasOption(var9))).prepareLaunch(gameFolder);
             }
         } else {
             /* Print Help */
