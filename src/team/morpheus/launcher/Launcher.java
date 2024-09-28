@@ -93,6 +93,8 @@ public class Launcher {
         if (!jsonFile.exists()) {
             if (mcLowercase.contains("fabric")) {
                 doFabricSetup(mcLowercase, jsonFile);
+            } else if (mcLowercase.contains("optiforge")) {
+                doOptiForgeSetup(mcLowercase, jsonFile);
             } else if (mcLowercase.contains("forge")) {
                 doForgeSetup(mcLowercase, jsonFile);
                 overwriteJsonId(variables.getMcVersion(), jsonFile);
@@ -274,6 +276,51 @@ public class Launcher {
         ParallelTasks tasks = new ParallelTasks();
         tasks.add(new DownloadFileTask(new URL(String.format("%s/loader/%s/%s/profile/json", Main.getFabricVersionsURL(), split[3], split[2])), jsonFile.getPath()));
         tasks.go();
+    }
+
+    private void doOptiForgeSetup(String mcVersion, File jsonFile) throws IOException, ParseException, InterruptedException {
+        /* Install optifine */
+        doOptifineSetup(mcVersion, jsonFile);
+
+        /* Make the modlist json */
+        String modlistName = String.format("tempModList-%s.json", mcVersion);
+        File modlistFile = new File(String.format("%s/%s", gameFolder, modlistName));
+        JSONObject optiJsonObject = new JSONObject();
+        optiJsonObject.put("repositoryRoot", "C:\\Users\\Lampadina_17\\AppData\\Roaming\\.minecraft\\libraries");
+        optiJsonObject.put("modRef", getOptifineModList(jsonFile));  // Qui usiamo l'array modRefArray che abbiamo popolato sopra
+        FileWriter file = new FileWriter(modlistFile);
+        file.write(optiJsonObject.toJSONString());
+        file.flush();
+        file.close();
+
+        /* Install forge */
+        doForgeSetup(mcVersion, jsonFile);
+
+        /* Do json patches */
+        FileReader reader = new FileReader(jsonFile);
+        JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
+        jsonObject.replace("minecraftArguments", jsonObject.get("minecraftArguments"), String.format("%s --modListFile %s", jsonObject.get("minecraftArguments"), modlistName));
+        jsonObject.replace("id", jsonObject.get("id"), mcVersion);
+        FileWriter writer = new FileWriter(jsonFile);
+        writer.write(jsonObject.toJSONString());
+        writer.flush();
+        writer.close();
+    }
+
+    /* Extract optifine library name from optifine json */
+    private JSONArray getOptifineModList(File jsonFile) throws IOException, ParseException {
+        FileReader OptifineReader = new FileReader(jsonFile);
+        JSONObject OptifineJsonObject = (JSONObject) jsonParser.parse(OptifineReader);
+        JSONArray libraries = (JSONArray) OptifineJsonObject.get("libraries");
+        JSONArray modRefArray = new JSONArray();
+        for (Object libObject : libraries) {
+            JSONObject library = (JSONObject) libObject;
+            String libraryName = (String) library.get("name");
+            if (libraryName != null && libraryName.startsWith("optifine:")) {
+                modRefArray.add(libraryName);
+            }
+        }
+        return modRefArray;
     }
 
     private void doForgeSetup(String mcLowercase, File jsonFile) throws IOException, ParseException, InterruptedException {
@@ -611,20 +658,22 @@ public class Launcher {
                 if (lib.rules != null) allow = checkRule(lib.rules);
                 if (!allow) continue;
 
-                /* Jar library local file path */
-                File file = new File(String.format("%s/%s", libFolder.getPath(), artifact.path));
+                if (artifact.path != null && !artifact.path.isEmpty()) {
+                    /* Jar library local file path */
+                    File file = new File(String.format("%s/%s", libFolder.getPath(), artifact.path));
 
-                /* if the library jar doesn't exist or its hash is invalidated, download from mojang repo */
-                if (artifact.url != null && !artifact.url.isEmpty() && (!file.exists() || file.exists() && !artifact.sha1.equals(CryptoEngine.fileHash(file, "SHA-1")))) {
-                    file.mkdirs();
-                    ParallelTasks tasks = new ParallelTasks();
-                    tasks.add(new DownloadFileTask(new URL(artifact.url), file.getPath()));
-                    tasks.go();
-                }
+                    /* if the library jar doesn't exist or its hash is invalidated, download from mojang repo */
+                    if (artifact.url != null && !artifact.url.isEmpty() && (!file.exists() || file.exists() && !artifact.sha1.equals(CryptoEngine.fileHash(file, "SHA-1")))) {
+                        file.mkdirs();
+                        ParallelTasks tasks = new ParallelTasks();
+                        tasks.add(new DownloadFileTask(new URL(artifact.url), file.getPath()));
+                        tasks.go();
+                    }
 
-                /* Append the library path to local list if not present */
-                if (!paths.contains(file.toURI().toURL()) && paths.add(file.toURI().toURL())) {
-                    log.info(String.format("Loading: %s", file.toURI().toURL()));
+                    /* Append the library path to local list if not present */
+                    if (!paths.contains(file.toURI().toURL()) && paths.add(file.toURI().toURL())) {
+                        log.info(String.format("Loading: %s", file.toURI().toURL()));
+                    }
                 }
             }
 

@@ -23,6 +23,7 @@ public class Vanilla {
                 || mcVersion.toLowerCase().contains("forge")
                 || mcVersion.toLowerCase().contains("quilt")
                 || mcVersion.toLowerCase().contains("optifine")
+                || mcVersion.toLowerCase().contains("optiforge")
                 || mcVersion.toLowerCase().contains("liteloader");
 
         log.info(String.format("Launching %s instance (%s)", !modded ? "Vanilla" : "Modded", mcVersion));
