@@ -12,7 +12,7 @@ import team.morpheus.launcher.utils.OSUtils;
 
 public class Main {
 
-    public static final String build = "(v2.2.0 | 28_09_2024)";
+    public static final String build = "(v2.2.1 | 03_11_2024)";
     private static final MyLogger log = new MyLogger(Main.class);
 
     @Getter
@@ -96,7 +96,7 @@ public class Main {
 
     /* ----- Optifine ----- */
     public static final String getOptifineVersionsURL() {
-        return "https://morpheuslauncher.it/downloads/optifine.json";
+        return String.format("%s/downloads/optifine.json", getMorpheusAPI());
     }
 
     /* ----- Morpheus ----- */

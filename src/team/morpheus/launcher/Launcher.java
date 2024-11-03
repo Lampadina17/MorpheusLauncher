@@ -470,7 +470,8 @@ public class Launcher {
         /* Iterate optifine game versions */
         for (Object key : jsonObject.keySet()) {
             String versionKey = (String) key;
-            if (mcVersion.toLowerCase().contains(versionKey)) {
+            /* Find the correct game version for optifine */
+            if (mcVersion.split("-")[0].equals(versionKey)) {
                 JSONObject versionList = (JSONObject) jsonObject.get(versionKey);
 
                 /* Prepare optifine installer url */
