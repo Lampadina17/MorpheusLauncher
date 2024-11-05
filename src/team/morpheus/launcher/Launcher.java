@@ -286,7 +286,7 @@ public class Launcher {
         String modlistName = String.format("tempModList-%s.json", mcVersion);
         File modlistFile = new File(String.format("%s/%s", gameFolder, modlistName));
         JSONObject optiJsonObject = new JSONObject();
-        optiJsonObject.put("repositoryRoot", "C:\\Users\\Lampadina_17\\AppData\\Roaming\\.minecraft\\libraries");
+        optiJsonObject.put("repositoryRoot", String.format("%s/libraries", gameFolder));
         optiJsonObject.put("modRef", getOptifineModList(jsonFile));  // Qui usiamo l'array modRefArray che abbiamo popolato sopra
         FileWriter file = new FileWriter(modlistFile);
         file.write(optiJsonObject.toJSONString());
